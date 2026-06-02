@@ -17,7 +17,9 @@ def get_connection():
         user=DB_USER,
         password=DB_PASSWORD
     )
-
+@app.route("/version")
+def version():
+    return {"version": "v2"}
 
 @app.route("/api/jobs")
 def get_jobs():
