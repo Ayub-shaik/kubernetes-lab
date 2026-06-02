@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Kubernetes Frontend</title>
+</head>
+
+<body>
+  <h1>Frontend Application</h1>
+
+  <p>Kubernetes frontend is working.</p>
+
+  <button onclick="callApi()">Call Backend API</button>
+
+  <pre id="output"></pre>
+
+  <script>
+    async function callApi() {
+      const response = await fetch('/api');
+      const data = await response.text();
+
+      document.getElementById('output').innerText = data;
+    }
+  </script>
+
+</body>
+</html>

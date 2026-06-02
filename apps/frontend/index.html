@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Shaik Technologies</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      margin: 0;
+      background: #f5f5f5;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 20px;
+    }
+
+    nav a {
+      color: white;
+      margin-right: 20px;
+      text-decoration: none;
+    }
+
+    .container {
+      padding: 40px;
+    }
+
+    .card {
+      background: white;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #2563eb;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    pre {
+      background: #111827;
+      color: #22c55e;
+      padding: 15px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>Shaik Technologies</h1>
+
+  <nav>
+    <a href="/">Home</a>
+    <a href="#">Careers</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Platform Engineering Demo</h2>
+
+    <p>
+      Kubernetes + Ingress + Monitoring + CI/CD Demo Project
+    </p>
+
+    <button onclick="loadJobs()">
+      Load Open Positions
+    </button>
+
+    <pre id="output"></pre>
+  </div>
+
+</div>
+
+<script>
+async function loadJobs() {
+
+  const response = await fetch('/api/jobs');
+
+  const data = await response.json();
+
+  document.getElementById('output').innerText =
+    JSON.stringify(data, null, 2);
+}
+</script>
+
+</body>
+</html>

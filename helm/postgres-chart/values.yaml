@@ -1,0 +1,11 @@
+postgres:
+  image: postgres:16
+
+  user: admin
+  password: admin123
+  database: companydb
+
+  storage: 1Gi
+
+service:
+  port: 5432
