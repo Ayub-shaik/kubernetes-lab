@@ -1,5 +1,6 @@
 postgres:
-  image: postgres:16
+  image: postgres:16cd ..
+  
 
   user: admin
   password: admin123

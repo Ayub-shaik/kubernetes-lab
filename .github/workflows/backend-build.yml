@@ -7,13 +7,10 @@ on:
       - '.github/workflows/backend-build.yml'
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -33,3 +30,8 @@ jobs:
         run: |
           docker push \
           ${{ secrets.DOCKERHUB_USERNAME }}/shaik-backend:latest
+
+      # ✅ NEW STEP ADDED (CI/CD → K8s SYNC)
+      - name: Trigger Kubernetes Rollout
+        run: |
+          kubectl rollout restart deployment backend-api -n backend
