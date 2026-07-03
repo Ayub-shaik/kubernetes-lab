@@ -44,7 +44,7 @@ jobs:
           ${{ secrets.DOCKERHUB_USERNAME }}/shaik-backend:latest
 
       # -----------------------------
-      # 5. Deploy to Kubernetes
+      # 5. Deploy to Kubernetes.
       # -----------------------------
       - name: Deploy Backend to Kubernetes
         run: |
