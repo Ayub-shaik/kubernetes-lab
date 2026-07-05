@@ -21,10 +21,7 @@ spec:
       containers:
       - name: backend-api
 
-        image: hashicorp/http-echo
-
-        args:
-        - "-text=Hello from backend API"
+        image: docshaik/shaik-backend:latest
 
         ports:
         - containerPort: 5000
