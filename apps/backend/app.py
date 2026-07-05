@@ -1,8 +1,24 @@
 from flask import Flask, jsonify
 import psycopg2
 import os
+import time
 
 app = Flask(__name__)
+
+REQUEST_COUNT = 0
+
+@app.before_request
+def count_requests():
+    global REQUEST_COUNT
+    REQUEST_COUNT += 1
+
+@app.route("/metrics")
+def metrics():
+    return jsonify({
+        "requests": REQUEST_COUNT,
+        "status": "ok",
+        "service": "backend-api"
+    })
 
 DB_HOST = os.getenv("DB_HOST", "postgres-service")
 DB_NAME = os.getenv("DB_NAME", "companydb")
@@ -59,7 +75,9 @@ def cluster_health():
 
 @app.route("/health")
 def health():
-    return jsonify({"status": "healthy"})
+    return jsonify({
+        "status": "healthy"
+    })
 
 
 if __name__ == "__main__":

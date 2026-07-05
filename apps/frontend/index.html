@@ -147,8 +147,12 @@
   <!-- LOG PANEL -->
   <div class="card">
     <h2>System Response Log</h2>
-
     <pre id="log">Waiting for events...</pre>
+  </div>
+  <!-- Metrics panel-->
+  <div class="card">
+    <h2>Backend Metrics</h2>
+    <pre id="metrics">Loading...</pre>
   </div>
 
 </div>
@@ -186,6 +190,28 @@ async function loadJobs() {
       "ERROR: Backend not reachable\n" + err;
   }
 }
+
+async function loadHealth() {
+  const res = await fetch('/api/health');
+  const data = await res.json();
+
+  document.getElementById("status").innerText =
+    JSON.stringify(data, null, 2);
+}
+
+setInterval(loadHealth, 3000);
+loadHealth();
+
+async function loadMetrics() {
+  const res = await fetch('/api/metrics');
+  const data = await res.json();
+
+  document.getElementById("metrics").innerText =
+    JSON.stringify(data, null, 2);
+}
+
+setInterval(loadMetrics, 3000);
+loadMetrics();
 </script>
 
 </body>
