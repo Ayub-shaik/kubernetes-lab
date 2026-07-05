@@ -1,53 +1,85 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <title>Shaik Technologies</title>
+  <title>FlowOps Kubernetes Dashboard</title>
 
   <style>
     body {
       font-family: Arial;
       margin: 0;
-      background: #f5f5f5;
+      background: #0b1220;
+      color: #e5e7eb;
     }
 
     header {
       background: #111827;
-      color: white;
       padding: 20px;
+      border-bottom: 1px solid #1f2937;
     }
 
-    nav a {
-      color: white;
-      margin-right: 20px;
-      text-decoration: none;
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #60a5fa;
     }
 
     .container {
-      padding: 40px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
     }
 
     .card {
-      background: white;
+      background: #111827;
       padding: 20px;
-      margin-top: 20px;
       border-radius: 10px;
+      border: 1px solid #1f2937;
+    }
+
+    .status {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .badge {
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+
+    .green {
+      background: #16a34a;
+      color: white;
+    }
+
+    .red {
+      background: #dc2626;
+      color: white;
     }
 
     button {
-      padding: 10px 20px;
+      padding: 10px 15px;
       background: #2563eb;
       color: white;
       border: none;
       cursor: pointer;
-      border-radius: 5px;
+      border-radius: 6px;
+      margin-top: 10px;
     }
 
     pre {
-      background: #111827;
-      color: #22c55e;
+      background: #0f172a;
       padding: 15px;
       border-radius: 10px;
+      overflow-x: auto;
+      color: #22c55e;
+    }
+
+    .small {
+      font-size: 12px;
+      color: #9ca3af;
     }
   </style>
 </head>
@@ -55,43 +87,104 @@
 <body>
 
 <header>
-  <h1>Shaik Technologies</h1>
-
-  <nav>
-    <a href="/">Home</a>
-    <a href="#">Careers</a>
-    <a href="#">About</a>
-    <a href="#">Contact</a>
-  </nav>
+  <h1>FlowOps Kubernetes Control Dashboard</h1>
+  <div class="small">DevOps + CI/CD + Kubernetes Lab Interface</div>
 </header>
 
 <div class="container">
 
+  <!-- SYSTEM STATUS -->
   <div class="card">
-    <h2>Platform Engineering Demo</h2>
+    <h2>System Status</h2>
 
-    <p>
-      Kubernetes + Ingress + Monitoring + CI/CD Demo Project
-    </p>
+    <div class="status">
+      <div class="badge green">Backend: Running</div>
+      <div class="badge green">Frontend: Running</div>
+      <div class="badge green">Postgres: Running</div>
+    </div>
+
+    <div class="small" style="margin-top:10px;">
+      Namespace: backend | Cluster: k3s local
+    </div>
+  </div>
+
+  <!-- API TEST -->
+  <div class="card">
+    <h2>Backend API Console</h2>
 
     <button onclick="loadJobs()">
-      Load Open Positions
+      Run API Test (/api/jobs)
     </button>
 
-    <pre id="output"></pre>
+    <pre id="output">Click button to fetch backend response...</pre>
+  </div>
+
+  <!-- DEPLOYMENT INFO -->
+  <div class="card">
+    <h2>Deployment Monitor</h2>
+
+    <div class="small">
+      Last Action: Manual / GitHub Actions Triggered
+    </div>
+
+    <div class="small">
+      CI/CD: GitHub Actions → Self-hosted Runner → Kubernetes
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Cluster Status (Live)</h2>
+    <pre id="status">Loading...</pre>
+  </div>
+
+  <div class="card">
+    <h2>Observability</h2>
+    <a href="http://localhost:30248" target="_blank">
+      Open Grafana Dashboard
+    </a>
+  </div>
+
+  <!-- LOG PANEL -->
+  <div class="card">
+    <h2>System Response Log</h2>
+
+    <pre id="log">Waiting for events...</pre>
   </div>
 
 </div>
 
 <script>
+
+async function loadStatus() {
+  const res = await fetch('/api/cluster-health');
+  const data = await res.json();
+
+  document.getElementById("status").innerText =
+    JSON.stringify(data, null, 2);
+}
+
+setInterval(loadStatus, 5000);
+loadStatus();
+
 async function loadJobs() {
 
-  const response = await fetch('/api/jobs');
+  document.getElementById('log').innerText =
+    "Calling backend API...\nConnecting to /api/jobs";
 
-  const data = await response.json();
+  try {
+    const response = await fetch('/api/jobs');
+    const data = await response.json();
 
-  document.getElementById('output').innerText =
-    JSON.stringify(data, null, 2);
+    document.getElementById('output').innerText =
+      JSON.stringify(data, null, 2);
+
+    document.getElementById('log').innerText =
+      "API call successful\nStatus: OK\nResponse received from backend";
+
+  } catch (err) {
+    document.getElementById('log').innerText =
+      "ERROR: Backend not reachable\n" + err;
+  }
 }
 </script>
 

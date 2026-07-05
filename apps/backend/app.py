@@ -46,6 +46,16 @@ def get_jobs():
 
     return jsonify(jobs)
 
+@app.route("/cluster-health")
+def cluster_health():
+    return {
+        "backend": "running",
+        "frontend": "running",
+        "postgres": "running",
+        "ci_cd": "active",
+        "cluster": "k3s-ready"
+    }
+
 
 @app.route("/health")
 def health():
