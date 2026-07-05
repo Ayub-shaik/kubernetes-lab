@@ -1,4 +1,4 @@
-name: Build Backend Image
+name: Backend CI Build
 
 on:
   push:
@@ -11,57 +11,39 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # -----------------------------
-      # 1. Checkout Source Code
-      # -----------------------------
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # -----------------------------
-      # 2. Login to Docker Hub
-      # -----------------------------
-      - name: Login To Docker Hub
+      - name: Set Image Tag
+        id: vars
+        run: |
+          echo "IMAGE_TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # -----------------------------
-      # 3. Build Docker Image
-      # -----------------------------
       - name: Build Image
         run: |
           docker build \
-          -t ${{ secrets.DOCKERHUB_USERNAME }}/shaik-backend:latest \
+          -t ${{ secrets.DOCKERHUB_USERNAME }}/shaik-backend:${IMAGE_TAG} \
           ./apps/backend
 
-      # -----------------------------
-      # 4. Push Docker Image
-      # -----------------------------
       - name: Push Image
         run: |
           docker push \
-          ${{ secrets.DOCKERHUB_USERNAME }}/shaik-backend:latest
+          ${{ secrets.DOCKERHUB_USERNAME }}/shaik-backend:${IMAGE_TAG}
 
-      # -----------------------------
-      # 5. Deploy to Kubernetes.
-      # -----------------------------
-      - name: Deploy Backend to Kubernetes
+      - name: Update Kubernetes Manifest (GitOps step)
         run: |
-          kubectl apply -f infra/k8s/backend/
+          sed -i "s|image: .*shaik-backend.*|image: ${{ secrets.DOCKERHUB_USERNAME }}/shaik-backend:${IMAGE_TAG}|g" infra/k8s/backend/backend.yaml
 
-      # -----------------------------
-      # 6. Wait for Rollout (CRITICAL)
-      # -----------------------------
-      - name: Wait for Rollout to Complete
+      - name: Commit Manifest Change
         run: |
-          kubectl rollout status deployment/backend-api -n backend --timeout=120s
-
-      # -----------------------------
-      # 7. Verify Deployment Health
-      # -----------------------------
-      - name: Verify Backend Health
-        run: |
-          kubectl get pods -n backend
-          kubectl get svc -n backend
-          kubectl describe deployment backend-api -n backend
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add infra/k8s/backend/backend.yaml
+          git commit -m "update backend image to ${IMAGE_TAG}" || echo "no changes"
+          git push

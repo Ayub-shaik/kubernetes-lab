@@ -21,7 +21,8 @@ spec:
       containers:
       - name: backend-api
 
-        image: docshaik/shaik-backend:latest
+        image: docshaik/shaik-backend:latest   # fallback only
+        imagePullPolicy: Always
 
         ports:
         - containerPort: 5000
