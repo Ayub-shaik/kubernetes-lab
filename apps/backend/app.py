@@ -1,25 +1,24 @@
 from flask import Flask, jsonify
 import psycopg2
 import os
-import time
 
 app = Flask(__name__)
 
+# -----------------------------
+# Metrics Tracking
+# -----------------------------
 REQUEST_COUNT = 0
+
 
 @app.before_request
 def count_requests():
     global REQUEST_COUNT
     REQUEST_COUNT += 1
 
-@app.route("/metrics")
-def metrics():
-    return jsonify({
-        "requests": REQUEST_COUNT,
-        "status": "ok",
-        "service": "backend-api"
-    })
 
+# -----------------------------
+# DB Config (future-ready)
+# -----------------------------
 DB_HOST = os.getenv("DB_HOST", "postgres-service")
 DB_NAME = os.getenv("DB_NAME", "companydb")
 DB_USER = os.getenv("DB_USER", "admin")
@@ -33,50 +32,65 @@ def get_connection():
         user=DB_USER,
         password=DB_PASSWORD
     )
+
+
+# -----------------------------
+# Core APIs
+# -----------------------------
+@app.route("/health")
+def health():
+    return jsonify({
+        "status": "healthy",
+        "service": "backend-api"
+    })
+
+
 @app.route("/version")
 def version():
-    return {"version": "v2"}
+    return jsonify({
+        "version": "v2"
+    })
+
 
 @app.route("/api/jobs")
-def get_jobs():
+def jobs():
+    return jsonify({
+        "jobs": [
+            {"id": 1, "name": "devops-engineer"},
+            {"id": 2, "name": "platform-engineer"},
+            {"id": 3, "name": "sre-engineer"}
+        ],
+        "status": "success"
+    })
 
-    conn = get_connection()
 
-    cur = conn.cursor()
-
-    cur.execute("SELECT id, role, location FROM jobs")
-
-    rows = cur.fetchall()
-
-    cur.close()
-    conn.close()
-
-    jobs = []
-
-    for row in rows:
-        jobs.append({
-            "id": row[0],
-            "role": row[1],
-            "location": row[2]
-        })
-
-    return jsonify(jobs)
-
-@app.route("/cluster-health")
+@app.route("/api/cluster-health")
 def cluster_health():
-    return {
+    return jsonify({
         "backend": "running",
         "frontend": "running",
         "postgres": "running",
         "ci_cd": "active",
+        "gitops": "argo-enabled",
         "cluster": "k3s-ready"
-    }
+    })
 
 
-@app.route("/health")
-def health():
+@app.route("/api/metrics")
+def metrics():
     return jsonify({
-        "status": "healthy"
+        "requests": REQUEST_COUNT,
+        "service": "backend-api",
+        "status": "ok"
+    })
+
+
+# Optional root (safe response)
+@app.route("/")
+def root():
+    return jsonify({
+        "service": "backend-api",
+        "status": "running"
     })
 
 

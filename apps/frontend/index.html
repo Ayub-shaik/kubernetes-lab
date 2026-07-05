@@ -103,7 +103,7 @@
       <div class="badge green">Postgres: Running</div>
     </div>
 
-    <div class="small" style="margin-top:10px;">
+    <div class="small">
       Namespace: backend | Cluster: k3s local
     </div>
   </div>
@@ -112,9 +112,7 @@
   <div class="card">
     <h2>Backend API Console</h2>
 
-    <button onclick="loadJobs()">
-      Run API Test (/api/jobs)
-    </button>
+    <button onclick="loadJobs()">Run API Test (/api/jobs)</button>
 
     <pre id="output">Click button to fetch backend response...</pre>
   </div>
@@ -132,11 +130,13 @@
     </div>
   </div>
 
+  <!-- CLUSTER STATUS -->
   <div class="card">
     <h2>Cluster Status (Live)</h2>
     <pre id="status">Loading...</pre>
   </div>
 
+  <!-- OBSERVABILITY -->
   <div class="card">
     <h2>Observability</h2>
     <a href="http://localhost:30248" target="_blank">
@@ -144,12 +144,13 @@
     </a>
   </div>
 
-  <!-- LOG PANEL -->
+  <!-- LOG -->
   <div class="card">
     <h2>System Response Log</h2>
     <pre id="log">Waiting for events...</pre>
   </div>
-  <!-- Metrics panel-->
+
+  <!-- METRICS -->
   <div class="card">
     <h2>Backend Metrics</h2>
     <pre id="metrics">Loading...</pre>
@@ -159,9 +160,19 @@
 
 <script>
 
+async function safeFetchJson(url) {
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    return JSON.parse(text);
+  } catch (err) {
+    return { error: "Invalid JSON or API failure", details: err.toString() };
+  }
+}
+
+// -------------------- STATUS --------------------
 async function loadStatus() {
-  const res = await fetch('/api/cluster-health');
-  const data = await res.json();
+  const data = await safeFetchJson('/api/cluster-health');
 
   document.getElementById("status").innerText =
     JSON.stringify(data, null, 2);
@@ -170,41 +181,26 @@ async function loadStatus() {
 setInterval(loadStatus, 5000);
 loadStatus();
 
+
+// -------------------- JOBS --------------------
 async function loadJobs() {
 
   document.getElementById('log').innerText =
     "Calling backend API...\nConnecting to /api/jobs";
 
-  try {
-    const response = await fetch('/api/jobs');
-    const data = await response.json();
+  const data = await safeFetchJson('/api/jobs');
 
-    document.getElementById('output').innerText =
-      JSON.stringify(data, null, 2);
-
-    document.getElementById('log').innerText =
-      "API call successful\nStatus: OK\nResponse received from backend";
-
-  } catch (err) {
-    document.getElementById('log').innerText =
-      "ERROR: Backend not reachable\n" + err;
-  }
-}
-
-async function loadHealth() {
-  const res = await fetch('/api/health');
-  const data = await res.json();
-
-  document.getElementById("status").innerText =
+  document.getElementById('output').innerText =
     JSON.stringify(data, null, 2);
+
+  document.getElementById('log').innerText =
+    "API call completed";
 }
 
-setInterval(loadHealth, 3000);
-loadHealth();
 
+// -------------------- METRICS --------------------
 async function loadMetrics() {
-  const res = await fetch('/api/metrics');
-  const data = await res.json();
+  const data = await safeFetchJson('/api/metrics');
 
   document.getElementById("metrics").innerText =
     JSON.stringify(data, null, 2);
@@ -212,6 +208,7 @@ async function loadMetrics() {
 
 setInterval(loadMetrics, 3000);
 loadMetrics();
+
 </script>
 
 </body>
