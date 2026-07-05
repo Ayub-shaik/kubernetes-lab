@@ -43,4 +43,4 @@ spec:
 
   ports:
   - port: 80
-    targetPort: 5678
+    targetPort: 5000
