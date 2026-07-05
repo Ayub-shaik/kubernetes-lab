@@ -85,7 +85,7 @@ def metrics():
     })
 
 
-# Optional - root (safe response)
+# Optional root (safe response)
 @app.route("/")
 def root():
     return jsonify({
