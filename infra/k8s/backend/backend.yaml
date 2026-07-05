@@ -27,7 +27,7 @@ spec:
         - "-text=Hello from backend API"
 
         ports:
-        - containerPort: 5678
+        - containerPort: 5000
 
 ---
 apiVersion: v1
